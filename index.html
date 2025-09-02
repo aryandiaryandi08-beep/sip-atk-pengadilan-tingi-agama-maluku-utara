@@ -4,13 +4,1922 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIP-ATK - Sistem Informasi Permintaan ATK</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen">
-    <h1 class="text-2xl font-bold text-center mt-8">Pengadilan Tinggi Agama Maluku Utara</h1>
-    <p class="text-center text-gray-600">Sistem Informasi Permintaan ATK</p>
+    <!-- Admin Login -->
+    <div id="adminLogin" class="hidden min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full mx-4">
+            <!-- Court Header -->
+            <div class="bg-green-700 text-white py-6 rounded-t-xl">
+                <div class="text-center">
+                    <h1 class="text-lg font-bold">PENGADILAN TINGGI AGAMA MALUKU UTARA</h1>
+                    <p class="text-green-100 mt-2">Admin Portal - SIP-ATK</p>
+                </div>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="bg-white rounded-b-xl shadow-lg p-8">
+                <div class="text-center mb-6">
+                    <span class="text-4xl">🔐</span>
+                    <h2 class="text-2xl font-bold text-gray-800 mt-2">Login Administrator</h2>
+                    <p class="text-gray-600 mt-1">Masukkan kredensial untuk mengakses admin panel</p>
+                </div>
+                
+                <form id="adminLoginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="adminUsername" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Masukkan username" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="adminPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Masukkan password" required>
+                    </div>
+                    
+                    <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                        Username atau password salah!
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                        Login
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <button onclick="switchToEmployee()" class="text-green-600 hover:text-green-800 text-sm">
+                        ← Kembali ke Portal Pegawai
+                    </button>
+                </div>
+                
+                <!-- Demo Credentials Info -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-blue-800 text-sm font-medium mb-2">🔑 Kredensial Demo:</p>
+                    <p class="text-blue-700 text-sm">Username: <code class="bg-blue-100 px-2 py-1 rounded">admin</code></p>
+                    <p class="text-blue-700 text-sm">Password: <code class="bg-blue-100 px-2 py-1 rounded">admin123</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="script.js"></script>
-</body>
+    <!-- Admin Portal -->
+    <div id="adminPortal" class="hidden">
+        <!-- Admin Header -->
+        <header class="bg-white shadow-sm border-b">
+            <!-- Court Header -->
+            <div class="bg-green-700 text-white py-4">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-xl font-bold">PENGADILAN TINGGI AGAMA MALUKU UTARA</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Navigation Header -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🔧</span>
+                        <h2 class="text-xl font-semibold text-gray-800">Admin Panel - SIP-ATK</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="switchToEmployee()" class="text-sm text-green-600 hover:text-green-800">Portal Pegawai</button>
+                        <button onclick="adminLogout()" class="text-sm text-red-600 hover:text-red-800">Logout</button>
+                        <span class="text-sm text-gray-600">Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Admin Navigation -->
+        <nav class="bg-green-700 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-8">
+                    <a href="#" onclick="showAdminRequests()" class="px-3 py-4 text-sm font-medium hover:bg-green-800 transition duration-200 border-b-2 border-white" id="adminRequestsTab">Kelola Permintaan</a>
+                    <a href="#" onclick="showAdminStock()" class="px-3 py-4 text-sm font-medium hover:bg-green-800 transition duration-200 border-b-2 border-transparent" id="adminStockTab">Kelola Stok</a>
+                    <a href="#" onclick="showAdminEmployees()" class="px-3 py-4 text-sm font-medium hover:bg-green-800 transition duration-200 border-b-2 border-transparent" id="adminEmployeesTab">Kelola Pegawai</a>
+                    <a href="#" onclick="showGoogleSheets()" class="px-3 py-4 text-sm font-medium hover:bg-green-800 transition duration-200 border-b-2 border-transparent" id="googleSheetsTab">📊 Database Google Sheets</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Google Sheets Section -->
+            <div id="googleSheetsSection" class="hidden fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Database Google Sheets</h2>
+                    <p class="text-gray-600">Sinkronisasi data dengan Google Sheets untuk backup dan analisis</p>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Status Koneksi</h3>
+                        <div id="connectionStatus" class="flex items-center">
+                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            <span class="text-sm text-red-600">Tidak Terhubung</span>
+                        </div>
+                    </div>
+                    
+                    <div id="lastSyncInfo" class="text-sm text-gray-500 mb-4">
+                        Belum pernah sinkronisasi
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Google Sheets ID</label>
+                            <input type="text" id="spreadsheetId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan ID Google Sheets">
+                            <p class="text-xs text-gray-500 mt-1">ID dari URL Google Sheets Anda</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Google API Key</label>
+                            <input type="password" id="apiKey" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan API Key">
+                            <p class="text-xs text-gray-500 mt-1">API Key dari Google Cloud Console</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 space-x-2">
+                        <button onclick="testConnection()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Test Koneksi
+                        </button>
+                        <button onclick="saveGoogleSheetsConfig()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            Simpan Konfigurasi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Setup Instructions -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Panduan Setup Google Sheets</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <h4 class="font-medium text-gray-800">1. Buat Google Sheets Baru</h4>
+                            <p class="text-sm text-gray-600">Buat spreadsheet baru di Google Sheets dengan 3 sheet: "Permintaan", "Stok", dan "Pegawai"</p>
+                        </div>
+                        
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h4 class="font-medium text-gray-800">2. Dapatkan API Key</h4>
+                            <p class="text-sm text-gray-600">Buat project di Google Cloud Console, aktifkan Google Sheets API, dan buat API Key</p>
+                        </div>
+                        
+                        <div class="border-l-4 border-yellow-500 pl-4">
+                            <h4 class="font-medium text-gray-800">3. Set Permissions</h4>
+                            <p class="text-sm text-gray-600">Pastikan Google Sheets dapat diakses oleh siapa saja dengan link (view/edit)</p>
+                        </div>
+                        
+                        <div class="border-l-4 border-purple-500 pl-4">
+                            <h4 class="font-medium text-gray-800">4. Copy Spreadsheet ID</h4>
+                            <p class="text-sm text-gray-600">Ambil ID dari URL: https://docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-yellow-800 text-sm">
+                            <strong>⚠️ Catatan:</strong> Fitur ini memerlukan koneksi internet dan konfigurasi Google API yang benar. 
+                            Data akan tetap tersimpan secara lokal meskipun sinkronisasi gagal.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sync Actions -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Sinkronisasi</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="syncToSheets()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center">
+                            <span class="mr-2">📤</span>
+                            Sync ke Google Sheets
+                        </button>
+                        
+                        <button onclick="syncFromSheets()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                            <span class="mr-2">📥</span>
+                            Import dari Sheets
+                        </button>
+                        
+                        <button onclick="createSampleSheets()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-200 flex items-center justify-center">
+                            <span class="mr-2">📋</span>
+                            Buat Template Sheets
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p><strong>Sync ke Google Sheets:</strong> Upload semua data lokal ke Google Sheets</p>
+                        <p><strong>Import dari Sheets:</strong> Download data dari Google Sheets ke sistem lokal</p>
+                        <p><strong>Buat Template:</strong> Buat struktur sheet yang sesuai dengan sistem</p>
+                    </div>
+                </div>
+
+                <!-- Sync Log -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Log Sinkronisasi</h3>
+                    <div id="syncLog" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-gray-500 text-sm">Belum ada aktivitas sinkronisasi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Requests Section -->
+            <div id="adminRequestsSection" class="fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Kelola Permintaan ATK</h2>
+                    <p class="text-gray-600">Kelola semua permintaan ATK dari pegawai</p>
+                </div>
+
+                <!-- Admin Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <span class="text-yellow-600 text-xl">⏳</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Menunggu</p>
+                                <p class="text-2xl font-bold text-gray-800" id="adminPendingCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <span class="text-green-600 text-xl">✅</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Disetujui</p>
+                                <p class="text-2xl font-bold text-gray-800" id="adminApprovedCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <span class="text-red-600 text-xl">❌</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Ditolak</p>
+                                <p class="text-2xl font-bold text-gray-800" id="adminRejectedCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <span class="text-blue-600 text-xl">📊</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Total</p>
+                                <p class="text-2xl font-bold text-gray-800" id="adminTotalCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Requests for Admin -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Semua Permintaan</h3>
+                    <div id="adminAllRequests" class="space-y-4">
+                        <!-- Requests will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Stock Section -->
+            <div id="adminStockSection" class="hidden fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Kelola Stok ATK</h2>
+                    <p class="text-gray-600">Kelola inventaris dan stok alat tulis kantor</p>
+                </div>
+
+                <!-- Stock Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <span class="text-blue-600 text-xl">📦</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Total Item</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalItemsCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <span class="text-green-600 text-xl">✅</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Stok Aman</p>
+                                <p class="text-2xl font-bold text-gray-800" id="safeStockCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <span class="text-yellow-600 text-xl">⚠️</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Stok Menipis</p>
+                                <p class="text-2xl font-bold text-gray-800" id="lowStockCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <span class="text-red-600 text-xl">❌</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Stok Habis</p>
+                                <p class="text-2xl font-bold text-gray-800" id="outOfStockCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add New Stock Item Form -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Tambah Barang Baru</h3>
+                    <form id="adminAddStockForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang</label>
+                                <input type="text" id="adminNewStockName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan nama barang">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stok Awal</label>
+                                <input type="number" id="adminNewStockQuantity" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Satuan</label>
+                                <input type="text" id="adminNewStockUnit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="pcs, box, rim">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Stok Minimum</label>
+                                <input type="number" id="adminNewStockMinStock" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="5">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                            <textarea id="adminNewStockDescription" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Deskripsi barang (opsional)"></textarea>
+                        </div>
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            Tambah Barang
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Stock Items Table -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Inventaris Stok</h3>
+                        <div class="space-x-2">
+                            <button onclick="exportStock()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 text-sm">
+                                Export Data
+                            </button>
+                            <button onclick="showLowStockOnly()" id="filterLowStockBtn" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition duration-200 text-sm">
+                                Tampilkan Stok Menipis
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Barang</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stok</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Satuan</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Min. Stok</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminStockTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Stock items will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Employees Section -->
+            <div id="adminEmployeesSection" class="hidden fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Kelola Data Pegawai</h2>
+                    <p class="text-gray-600">Kelola database pegawai dan jabatan</p>
+                </div>
+
+                <!-- Add New Employee Form -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Tambah Pegawai Baru</h3>
+                    <form id="adminAddEmployeeForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">NIP</label>
+                                <input type="text" id="adminNewEmployeeNip" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan NIP">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="adminNewEmployeeName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan nama lengkap">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
+                                <select id="adminNewEmployeePosition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <option value="">Pilih jabatan...</option>
+                                    <option value="Ketua">Ketua</option>
+                                    <option value="Wakil Ketua">Wakil Ketua</option>
+                                    <option value="Hakim Tinggi">Hakim Tinggi</option>
+                                    <option value="Sekretaris">Sekretaris</option>
+                                    <option value="Panitera">Panitera</option>
+                                    <option value="Panitera Muda Hukum">Panitera Muda Hukum</option>
+                                    <option value="Panitera Muda Banding">Panitera Muda Banding</option>
+                                    <option value="Panitera Pengganti">Panitera Pengganti</option>
+                                    <option value="Kabag Umum dan Keuangan">Kabag Umum dan Keuangan</option>
+                                    <option value="Kabag Perencanaan dan Kepegawaian">Kabag Perencanaan dan Kepegawaian</option>
+                                    <option value="Kasubbag Rencana Program dan Anggaran">Kasubbag Rencana Program dan Anggaran</option>
+                                    <option value="Kasubbag Kepegawaian dan Teknologi Informasi">Kasubbag Kepegawaian dan Teknologi Informasi</option>
+                                    <option value="Kasubbag Tata Usaha dan Rumah Tangga">Kasubbag Tata Usaha dan Rumah Tangga</option>
+                                    <option value="Kasubbag Keuangan dan Pelaporan">Kasubbag Keuangan dan Pelaporan</option>
+                                    <option value="Operator Layanan Operasional">Operator Layanan Operasional</option>
+                                    <option value="Penata Layanan Operasional">Penata Layanan Operasional</option>
+                                    <option value="Analis Perkara Peradilan">Analis Perkara Peradilan</option>
+                                    <option value="Penelaah Teknis Kebijakan">Penelaah Teknis Kebijakan</option>
+                                    <option value="Pengadministrasi Perkantoran">Pengadministrasi Perkantoran</option>
+                                    <option value="Perencana Pertama">Perencana Pertama</option>
+                                    <option value="Penata Kelola Sistem dan Teknologi Informasi">Penata Kelola Sistem dan Teknologi Informasi</option>
+                                    <option value="Teknisi Sarana dan Prasarana">Teknisi Sarana dan Prasarana</option>
+                                    <option value="Pengolah Data dan Informasi">Pengolah Data dan Informasi</option>
+                                    <option value="Pranata Komputer Pertama">Pranata Komputer Pertama</option>
+                                    <option value="Pengelola Penanganan Perkara">Pengelola Penanganan Perkara</option>
+                                    <option value="Penata Keprotokolan">Penata Keprotokolan</option>
+                                    <option value="Dokumentalis Hukum">Dokumentalis Hukum</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            Tambah Pegawai
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Employees Table -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Database Pegawai</h3>
+                        <button onclick="exportEmployees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 text-sm">
+                            Export Data
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIP</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminEmployeesTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Employee items will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Employee Portal -->
+    <div id="employeePortal">
+        <!-- Employee Header -->
+        <header class="bg-white shadow-sm border-b">
+            <!-- Court Header -->
+            <div class="bg-green-700 text-white py-4">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-xl font-bold">PENGADILAN TINGGI AGAMA MALUKU UTARA</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Navigation Header -->
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">📋</span>
+                        <h2 class="text-xl font-semibold text-gray-800">SIP-ATK</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="switchToAdmin()" class="text-sm text-green-600 hover:text-green-800">Admin Portal</button>
+                        <span class="text-sm text-gray-600">Portal Pegawai</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Employee Content -->
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Employee Navigation -->
+            <div class="mb-8">
+                <div class="flex justify-center space-x-4">
+                    <button class="px-6 py-3 bg-green-600 text-white rounded-lg cursor-default" id="empRequestTab">
+                        📋 Ajukan Permintaan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Request Section -->
+            <div id="employeeRequestSection">
+                <!-- Welcome Section -->
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Ajukan Permintaan ATK</h2>
+                    <p class="text-gray-600 text-lg">Isi form di bawah untuk mengajukan permintaan alat tulis kantor</p>
+                </div>
+
+            <!-- Request Form -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <form id="employeeRequestForm" class="space-y-6">
+                    <!-- Employee Profile Section -->
+                    <div id="employeeProfileSection" class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-semibold text-gray-800">Profil Pegawai</h4>
+                            <button type="button" onclick="toggleEmployeeProfile()" id="editProfileBtn" class="text-blue-600 hover:text-blue-800 text-sm">Edit Profil</button>
+                        </div>
+                        <div id="employeeProfileDisplay" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-600">NIP:</p>
+                                <p class="font-medium" id="displayNip">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Nama:</p>
+                                <p class="font-medium" id="displayName">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Jabatan:</p>
+                                <p class="font-medium" id="displayPosition">-</p>
+                            </div>
+                        </div>
+                        <div id="employeeProfileEdit" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">NIP</label>
+                                <input type="text" id="empNip" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan NIP">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="empRequesterName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Masukkan nama lengkap">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
+                                <select id="empPosition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <option value="">Pilih jabatan...</option>
+                                    <option value="Ketua">Ketua</option>
+                                    <option value="Wakil Ketua">Wakil Ketua</option>
+                                    <option value="Hakim Tinggi">Hakim Tinggi</option>
+                                    <option value="Sekretaris">Sekretaris</option>
+                                    <option value="Panitera">Panitera</option>
+                                    <option value="Panitera Muda Hukum">Panitera Muda Hukum</option>
+                                    <option value="Panitera Muda Banding">Panitera Muda Banding</option>
+                                    <option value="Panitera Pengganti">Panitera Pengganti</option>
+                                    <option value="Kabag Umum dan Keuangan">Kabag Umum dan Keuangan</option>
+                                    <option value="Kabag Perencanaan dan Kepegawaian">Kabag Perencanaan dan Kepegawaian</option>
+                                    <option value="Kasubbag Rencana Program dan Anggaran">Kasubbag Rencana Program dan Anggaran</option>
+                                    <option value="Kasubbag Kepegawaian dan Teknologi Informasi">Kasubbag Kepegawaian dan Teknologi Informasi</option>
+                                    <option value="Kasubbag Tata Usaha dan Rumah Tangga">Kasubbag Tata Usaha dan Rumah Tangga</option>
+                                    <option value="Kasubbag Keuangan dan Pelaporan">Kasubbag Keuangan dan Pelaporan</option>
+                                    <option value="Operator Layanan Operasional">Operator Layanan Operasional</option>
+                                    <option value="Penata Layanan Operasional">Penata Layanan Operasional</option>
+                                    <option value="Analis Perkara Peradilan">Analis Perkara Peradilan</option>
+                                    <option value="Penelaah Teknis Kebijakan">Penelaah Teknis Kebijakan</option>
+                                    <option value="Pengadministrasi Perkantoran">Pengadministrasi Perkantoran</option>
+                                    <option value="Perencana Pertama">Perencana Pertama</option>
+                                    <option value="Penata Kelola Sistem dan Teknologi Informasi">Penata Kelola Sistem dan Teknologi Informasi</option>
+                                    <option value="Teknisi Sarana dan Prasarana">Teknisi Sarana dan Prasarana</option>
+                                    <option value="Pengolah Data dan Informasi">Pengolah Data dan Informasi</option>
+                                    <option value="Pranata Komputer Pertama">Pranata Komputer Pertama</option>
+                                    <option value="Pengelola Penanganan Perkara">Pengelola Penanganan Perkara</option>
+                                    <option value="Penata Keprotokolan">Penata Keprotokolan</option>
+                                    <option value="Dokumentalis Hukum">Dokumentalis Hukum</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="profileEditButtons" class="hidden mt-4 space-x-2">
+                            <button type="button" onclick="saveEmployeeProfile()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">Simpan</button>
+                            <button type="button" onclick="cancelEditProfile()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm">Batal</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Barang yang Diminta</label>
+                            <select id="empItemName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required onchange="updateEmployeeStockInfo()">
+                                <option value="">Pilih barang...</option>
+                                <option value="__new_item__">➕ Tambah Barang Baru</option>
+                            </select>
+                            <p id="empStockInfo" class="text-sm text-gray-500 mt-1"></p>
+                            
+                            <!-- New Item Fields (Hidden by default) -->
+                            <div id="newItemFields" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <h4 class="text-sm font-semibold text-blue-800 mb-3">Detail Barang Baru</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Nama Barang Baru</label>
+                                        <input type="text" id="empNewItemName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm" placeholder="Contoh: Highlighter, Correction Tape">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Satuan</label>
+                                        <input type="text" id="empNewItemUnit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm" placeholder="pcs, box, pack, dll">
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Deskripsi/Spesifikasi</label>
+                                    <textarea id="empNewItemDescription" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm" placeholder="Jelaskan spesifikasi atau merek yang diinginkan..."></textarea>
+                                </div>
+                                <div class="mt-2 text-xs text-blue-600">
+                                    💡 Barang baru akan ditambahkan ke database setelah admin menyetujui permintaan ini
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah yang Diminta</label>
+                            <input type="number" id="empQuantity" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Masukkan jumlah" required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Keperluan/Keterangan</label>
+                        <textarea id="empDescription" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Jelaskan untuk keperluan apa ATK ini akan digunakan..." required></textarea>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition duration-200 text-lg font-medium">
+                            Ajukan Permintaan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+                <!-- My Requests -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Permintaan Saya</h3>
+                    <div id="employeeMyRequests" class="space-y-4">
+                        <!-- Employee requests will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Application State
+        let requests = JSON.parse(localStorage.getItem('atkRequests')) || [];
+        let requestIdCounter = parseInt(localStorage.getItem('requestIdCounter')) || 1;
+        let stockItems = JSON.parse(localStorage.getItem('stockItems')) || [];
+        let stockIdCounter = parseInt(localStorage.getItem('stockIdCounter')) || 1;
+        let employees = JSON.parse(localStorage.getItem('employees')) || [];
+        let employeeIdCounter = parseInt(localStorage.getItem('employeeIdCounter')) || 1;
+        let currentUserSession = localStorage.getItem('currentUserSession') || generateUserSession();
+        let currentEmployeeProfile = JSON.parse(localStorage.getItem('currentEmployeeProfile_' + currentUserSession)) || null;
+        let isAdminMode = false;
+        let isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+        
+        // Google Sheets Configuration
+        let googleSheetsConfig = JSON.parse(localStorage.getItem('googleSheetsConfig')) || {
+            enabled: false,
+            spreadsheetId: '',
+            apiKey: '',
+            lastSync: null
+        };
+        
+        // Admin credentials
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialData();
+            checkPortalMode();
+            setupEventListeners();
+            loadGoogleSheetsConfig();
+        });
+
+        function generateUserSession() {
+            const session = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('currentUserSession', session);
+            return session;
+        }
+
+        function checkPortalMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            isAdminMode = urlParams.get('admin') === 'true';
+            
+            if (isAdminMode) {
+                if (isAdminLoggedIn) {
+                    showAdminPortal();
+                } else {
+                    showAdminLogin();
+                }
+            } else {
+                showEmployeePortal();
+            }
+        }
+
+        function switchToAdmin() {
+            const url = new URL(window.location);
+            url.searchParams.set('admin', 'true');
+            window.location.href = url.toString();
+        }
+
+        function switchToEmployee() {
+            const url = new URL(window.location);
+            url.searchParams.delete('admin');
+            window.location.href = url.toString();
+        }
+
+        function showAdminLogin() {
+            document.getElementById('adminLogin').classList.remove('hidden');
+            document.getElementById('adminPortal').classList.add('hidden');
+            document.getElementById('employeePortal').classList.add('hidden');
+        }
+
+        function showAdminPortal() {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPortal').classList.remove('hidden');
+            document.getElementById('employeePortal').classList.add('hidden');
+            showAdminRequests();
+        }
+
+        function showEmployeePortal() {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('employeePortal').classList.remove('hidden');
+            document.getElementById('adminPortal').classList.add('hidden');
+            loadEmployeeData();
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                isAdminLoggedIn = true;
+                localStorage.setItem('adminLoggedIn', 'true');
+                
+                // Clear form
+                document.getElementById('adminLoginForm').reset();
+                errorDiv.classList.add('hidden');
+                
+                showAdminPortal();
+            } else {
+                errorDiv.classList.remove('hidden');
+                
+                // Clear password field
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('Yakin ingin logout dari admin panel?')) {
+                isAdminLoggedIn = false;
+                localStorage.removeItem('adminLoggedIn');
+                
+                // Redirect to employee portal
+                const url = new URL(window.location);
+                url.searchParams.delete('admin');
+                window.location.href = url.toString();
+            }
+        }
+
+        function setupEventListeners() {
+            // Admin login form
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+            // Admin forms
+            document.getElementById('adminAddEmployeeForm').addEventListener('submit', handleAdminAddEmployee);
+            document.getElementById('adminAddStockForm').addEventListener('submit', handleAdminAddStock);
+            // Employee forms
+            document.getElementById('employeeRequestForm').addEventListener('submit', handleEmployeeRequest);
+        }
+
+        // Google Sheets Functions
+        function showGoogleSheets() {
+            updateAdminActiveTab('googleSheetsTab');
+            showAdminSection('googleSheetsSection');
+            updateConnectionStatus();
+        }
+
+        function loadGoogleSheetsConfig() {
+            document.getElementById('spreadsheetId').value = googleSheetsConfig.spreadsheetId || '';
+            document.getElementById('apiKey').value = googleSheetsConfig.apiKey || '';
+            updateConnectionStatus();
+        }
+
+        function updateConnectionStatus() {
+            const statusDiv = document.getElementById('connectionStatus');
+            const lastSyncDiv = document.getElementById('lastSyncInfo');
+            
+            if (googleSheetsConfig.enabled && googleSheetsConfig.spreadsheetId && googleSheetsConfig.apiKey) {
+                statusDiv.innerHTML = `
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                    <span class="text-sm text-green-600">Terhubung</span>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                    <span class="text-sm text-red-600">Tidak Terhubung</span>
+                `;
+            }
+            
+            if (googleSheetsConfig.lastSync) {
+                lastSyncDiv.textContent = `Sinkronisasi terakhir: ${googleSheetsConfig.lastSync}`;
+            } else {
+                lastSyncDiv.textContent = 'Belum pernah sinkronisasi';
+            }
+        }
+
+        function saveGoogleSheetsConfig() {
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!spreadsheetId || !apiKey) {
+                alert('Mohon lengkapi Spreadsheet ID dan API Key!');
+                return;
+            }
+            
+            googleSheetsConfig.spreadsheetId = spreadsheetId;
+            googleSheetsConfig.apiKey = apiKey;
+            googleSheetsConfig.enabled = true;
+            
+            localStorage.setItem('googleSheetsConfig', JSON.stringify(googleSheetsConfig));
+            updateConnectionStatus();
+            
+            addSyncLog('✅ Konfigurasi berhasil disimpan');
+            alert('Konfigurasi Google Sheets berhasil disimpan!');
+        }
+
+        async function testConnection() {
+            if (!googleSheetsConfig.spreadsheetId || !googleSheetsConfig.apiKey) {
+                alert('Mohon lengkapi konfigurasi terlebih dahulu!');
+                return;
+            }
+            
+            addSyncLog('🔄 Menguji koneksi...');
+            
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${googleSheetsConfig.spreadsheetId}?key=${googleSheetsConfig.apiKey}`;
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addSyncLog(`✅ Koneksi berhasil! Spreadsheet: "${data.properties.title}"`);
+                    alert('Koneksi berhasil! Google Sheets dapat diakses.');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                addSyncLog(`❌ Koneksi gagal: ${error.message}`);
+                alert(`Koneksi gagal: ${error.message}\n\nPastikan:\n1. Spreadsheet ID benar\n2. API Key valid\n3. Google Sheets API aktif\n4. Spreadsheet dapat diakses publik`);
+            }
+        }
+
+        async function syncToSheets() {
+            if (!googleSheetsConfig.enabled) {
+                alert('Mohon konfigurasi Google Sheets terlebih dahulu!');
+                return;
+            }
+            
+            addSyncLog('🔄 Memulai sinkronisasi ke Google Sheets...');
+            
+            try {
+                // Sync Requests
+                await syncRequestsToSheets();
+                
+                // Sync Stock
+                await syncStockToSheets();
+                
+                // Sync Employees
+                await syncEmployeesToSheets();
+                
+                googleSheetsConfig.lastSync = new Date().toLocaleString('id-ID');
+                localStorage.setItem('googleSheetsConfig', JSON.stringify(googleSheetsConfig));
+                updateConnectionStatus();
+                
+                addSyncLog('✅ Sinkronisasi berhasil!');
+                alert('Data berhasil disinkronisasi ke Google Sheets!');
+                
+            } catch (error) {
+                addSyncLog(`❌ Sinkronisasi gagal: ${error.message}`);
+                alert(`Sinkronisasi gagal: ${error.message}`);
+            }
+        }
+
+        async function syncRequestsToSheets() {
+            const sheetName = 'Permintaan';
+            const headers = ['ID', 'Tanggal', 'Waktu', 'NIP', 'Nama', 'Jabatan', 'Barang', 'Jumlah', 'Satuan', 'Keperluan', 'Status', 'Disetujui Oleh', 'Tanggal Disetujui'];
+            
+            const values = [headers];
+            
+            requests.forEach(req => {
+                values.push([
+                    req.id,
+                    req.requestDate,
+                    req.requestTime || '',
+                    req.nip || '',
+                    req.requester,
+                    req.position || req.department || '',
+                    req.itemName,
+                    req.quantity,
+                    req.isNewItem ? req.newItemData?.unit || 'pcs' : getItemUnit(req.itemName),
+                    req.description || '',
+                    getStatusText(req.status),
+                    req.approvedBy || '',
+                    req.approvedDate || ''
+                ]);
+            });
+            
+            await updateSheetData(sheetName, values);
+            addSyncLog(`📋 ${requests.length} permintaan berhasil disinkronisasi`);
+        }
+
+        async function syncStockToSheets() {
+            const sheetName = 'Stok';
+            const headers = ['ID', 'Nama Barang', 'Stok', 'Satuan', 'Stok Minimum', 'Status', 'Deskripsi', 'Tanggal Dibuat'];
+            
+            const values = [headers];
+            
+            stockItems.forEach(item => {
+                const status = getStockStatus(item);
+                values.push([
+                    item.id,
+                    item.name,
+                    item.stock,
+                    item.unit,
+                    item.minStock,
+                    status.text,
+                    item.description || '',
+                    item.createdDate || ''
+                ]);
+            });
+            
+            await updateSheetData(sheetName, values);
+            addSyncLog(`📦 ${stockItems.length} item stok berhasil disinkronisasi`);
+        }
+
+        async function syncEmployeesToSheets() {
+            const sheetName = 'Pegawai';
+            const headers = ['ID', 'NIP', 'Nama', 'Jabatan', 'Tanggal Dibuat'];
+            
+            const values = [headers];
+            
+            employees.forEach(emp => {
+                values.push([
+                    emp.id,
+                    emp.nip,
+                    emp.name,
+                    emp.position,
+                    emp.createdDate || ''
+                ]);
+            });
+            
+            await updateSheetData(sheetName, values);
+            addSyncLog(`👥 ${employees.length} pegawai berhasil disinkronisasi`);
+        }
+
+        async function updateSheetData(sheetName, values) {
+            const range = `${sheetName}!A1:Z${values.length}`;
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${googleSheetsConfig.spreadsheetId}/values/${range}?valueInputOption=RAW&key=${googleSheetsConfig.apiKey}`;
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    values: values
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Gagal update sheet ${sheetName}: ${response.statusText}`);
+            }
+        }
+
+        async function syncFromSheets() {
+            if (!googleSheetsConfig.enabled) {
+                alert('Mohon konfigurasi Google Sheets terlebih dahulu!');
+                return;
+            }
+            
+            if (!confirm('Import data dari Google Sheets akan menimpa data lokal. Lanjutkan?')) {
+                return;
+            }
+            
+            addSyncLog('🔄 Mengimpor data dari Google Sheets...');
+            
+            try {
+                // This is a demo implementation
+                // In real scenario, you would fetch data from sheets and parse it
+                addSyncLog('ℹ️ Fitur import masih dalam pengembangan');
+                alert('Fitur import dari Google Sheets masih dalam pengembangan.\n\nUntuk saat ini, gunakan fitur "Sync ke Google Sheets" untuk backup data.');
+                
+            } catch (error) {
+                addSyncLog(`❌ Import gagal: ${error.message}`);
+                alert(`Import gagal: ${error.message}`);
+            }
+        }
+
+        function createSampleSheets() {
+            if (!googleSheetsConfig.spreadsheetId) {
+                alert('Mohon masukkan Spreadsheet ID terlebih dahulu!');
+                return;
+            }
+            
+            const sheetsUrl = `https://docs.google.com/spreadsheets/d/${googleSheetsConfig.spreadsheetId}/edit`;
+            
+            const instructions = `
+Untuk membuat template yang sesuai:
+
+1. Buka Google Sheets Anda: ${sheetsUrl}
+
+2. Buat 3 sheet dengan nama:
+   - "Permintaan" 
+   - "Stok"
+   - "Pegawai"
+
+3. Pada sheet "Permintaan", buat header di baris pertama:
+   ID | Tanggal | Waktu | NIP | Nama | Jabatan | Barang | Jumlah | Satuan | Keperluan | Status | Disetujui Oleh | Tanggal Disetujui
+
+4. Pada sheet "Stok", buat header:
+   ID | Nama Barang | Stok | Satuan | Stok Minimum | Status | Deskripsi | Tanggal Dibuat
+
+5. Pada sheet "Pegawai", buat header:
+   ID | NIP | Nama | Jabatan | Tanggal Dibuat
+
+Setelah selesai, gunakan "Sync ke Google Sheets" untuk mengisi data.
+            `;
+            
+            alert(instructions);
+            addSyncLog('📋 Instruksi template sheet ditampilkan');
+        }
+
+        function addSyncLog(message) {
+            const logDiv = document.getElementById('syncLog');
+            const timestamp = new Date().toLocaleTimeString('id-ID');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'text-sm text-gray-600 py-1 border-b border-gray-100';
+            logEntry.innerHTML = `<span class="text-gray-400">${timestamp}</span> ${message}`;
+            
+            if (logDiv.children.length === 1 && logDiv.children[0].textContent.includes('Belum ada aktivitas')) {
+                logDiv.innerHTML = '';
+            }
+            
+            logDiv.insertBefore(logEntry, logDiv.firstChild);
+            
+            // Keep only last 20 entries
+            while (logDiv.children.length > 20) {
+                logDiv.removeChild(logDiv.lastChild);
+            }
+        }
+
+        // Admin Functions
+        function showAdminRequests() {
+            updateAdminActiveTab('adminRequestsTab');
+            showAdminSection('adminRequestsSection');
+            loadAdminRequests();
+            updateAdminStats();
+        }
+
+        function showAdminStock() {
+            updateAdminActiveTab('adminStockTab');
+            showAdminSection('adminStockSection');
+            loadAdminStockTable();
+            updateStockStats();
+        }
+
+        function showAdminEmployees() {
+            updateAdminActiveTab('adminEmployeesTab');
+            showAdminSection('adminEmployeesSection');
+            loadAdminEmployeesTable();
+        }
+
+        function updateAdminActiveTab(activeTabId) {
+            document.querySelectorAll('#adminPortal nav a').forEach(tab => {
+                tab.classList.remove('border-white');
+                tab.classList.add('border-transparent');
+            });
+            document.getElementById(activeTabId).classList.remove('border-transparent');
+            document.getElementById(activeTabId).classList.add('border-white');
+        }
+
+        function showAdminSection(sectionId) {
+            document.querySelectorAll('#adminPortal main > div').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function loadAdminRequests() {
+            const container = document.getElementById('adminAllRequests');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">Belum ada permintaan</p>';
+                return;
+            }
+            
+            // Sort by newest first
+            const sortedRequests = [...requests].sort((a, b) => b.id - a.id);
+            
+            container.innerHTML = sortedRequests.map(req => `
+                <div class="border border-gray-200 rounded-lg p-4 ${req.isNewItem ? 'border-blue-300 bg-blue-50' : ''}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-semibold text-gray-800">${req.itemName}</h4>
+                                ${req.isNewItem ? '<span class="px-2 py-1 bg-blue-500 text-white text-xs rounded-full">BARANG BARU</span>' : ''}
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-2 text-sm text-gray-600">
+                                <div>
+                                    <p><strong>Pemohon:</strong> ${req.requester}</p>
+                                    <p><strong>NIP:</strong> ${req.nip || '-'}</p>
+                                    <p><strong>Jabatan:</strong> ${req.position || req.department || '-'}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Jumlah:</strong> ${req.quantity} ${req.isNewItem ? req.newItemData.unit : getItemUnit(req.itemName)}</p>
+                                    <p><strong>Tanggal:</strong> ${req.requestDate}</p>
+                                </div>
+                            </div>
+                            ${req.isNewItem && req.newItemData ? `
+                                <div class="mt-2 p-2 bg-blue-100 rounded text-sm">
+                                    <p class="text-blue-800"><strong>Detail Barang Baru:</strong></p>
+                                    <p class="text-blue-700">Satuan: ${req.newItemData.unit}</p>
+                                    ${req.newItemData.description ? `<p class="text-blue-700">Spesifikasi: ${req.newItemData.description}</p>` : ''}
+                                </div>
+                            ` : ''}
+                            ${req.description ? `<p class="text-sm text-gray-600 mt-2 bg-gray-50 p-2 rounded"><strong>Keperluan:</strong> ${req.description}</p>` : ''}
+                        </div>
+                        <div class="text-right ml-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(req.status)}">
+                                ${getStatusText(req.status)}
+                            </span>
+                            ${req.status === 'pending' ? `
+                                <div class="mt-2 space-x-2">
+                                    <button onclick="approveRequest(${req.id})" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">
+                                        Setujui
+                                    </button>
+                                    <button onclick="rejectRequest(${req.id})" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">
+                                        Tolak
+                                    </button>
+                                </div>
+                            ` : ''}
+                            ${req.approvedBy ? `<p class="text-xs text-gray-500 mt-1">oleh ${req.approvedBy}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateAdminStats() {
+            const pending = requests.filter(req => req.status === 'pending').length;
+            const approved = requests.filter(req => req.status === 'approved').length;
+            const rejected = requests.filter(req => req.status === 'rejected').length;
+            const total = requests.length;
+            
+            document.getElementById('adminPendingCount').textContent = pending;
+            document.getElementById('adminApprovedCount').textContent = approved;
+            document.getElementById('adminRejectedCount').textContent = rejected;
+            document.getElementById('adminTotalCount').textContent = total;
+        }
+
+        function approveRequest(id) {
+            const request = requests.find(req => req.id === id);
+            if (!request) return;
+            
+            if (request.isNewItem) {
+                // Add new item to stock database
+                const newStockItem = {
+                    id: stockIdCounter++,
+                    name: request.newItemData.name,
+                    stock: request.quantity, // Set initial stock to requested quantity
+                    unit: request.newItemData.unit,
+                    description: request.newItemData.description || '',
+                    minStock: Math.max(1, Math.floor(request.quantity * 0.1)),
+                    createdDate: new Date().toLocaleDateString('id-ID')
+                };
+                
+                stockItems.push(newStockItem);
+                saveStock();
+                
+                alert(`Barang baru "${request.itemName}" berhasil ditambahkan ke database dengan stok awal ${request.quantity} ${request.newItemData.unit}`);
+            } else {
+                // Handle existing item
+                const stockItem = stockItems.find(item => item.name.toLowerCase() === request.itemName.toLowerCase());
+                if (stockItem && stockItem.stock >= request.quantity) {
+                    stockItem.stock -= request.quantity;
+                    saveStock();
+                }
+            }
+            
+            request.status = 'approved';
+            request.approvedBy = 'Administrator';
+            request.approvedDate = new Date().toLocaleDateString('id-ID');
+            saveRequests();
+            loadAdminRequests();
+            updateAdminStats();
+            updateStockStats();
+            populateEmployeeItemDropdown();
+        }
+
+        function rejectRequest(id) {
+            const request = requests.find(req => req.id === id);
+            if (request) {
+                request.status = 'rejected';
+                request.approvedBy = 'Administrator';
+                request.approvedDate = new Date().toLocaleDateString('id-ID');
+                saveRequests();
+                loadAdminRequests();
+                updateAdminStats();
+            }
+        }
+
+        function handleAdminAddStock(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('adminNewStockName').value;
+            const quantity = parseInt(document.getElementById('adminNewStockQuantity').value) || 0;
+            const unit = document.getElementById('adminNewStockUnit').value;
+            const minStock = parseInt(document.getElementById('adminNewStockMinStock').value) || 5;
+            const description = document.getElementById('adminNewStockDescription').value;
+            
+            if (!name || !unit) {
+                alert('Mohon lengkapi nama barang dan satuan!');
+                return;
+            }
+            
+            if (stockItems.find(item => item.name.toLowerCase() === name.toLowerCase())) {
+                alert('Barang dengan nama tersebut sudah ada!');
+                return;
+            }
+            
+            const newStockItem = {
+                id: stockIdCounter++,
+                name,
+                stock: quantity,
+                unit,
+                description,
+                minStock,
+                createdDate: new Date().toLocaleDateString('id-ID')
+            };
+            
+            stockItems.push(newStockItem);
+            saveStock();
+            
+            document.getElementById('adminAddStockForm').reset();
+            loadAdminStockTable();
+            updateStockStats();
+            populateEmployeeItemDropdown();
+            
+            alert('Barang berhasil ditambahkan!');
+        }
+
+        function loadAdminStockTable() {
+            const tbody = document.getElementById('adminStockTableBody');
+            
+            if (stockItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Belum ada data stok</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = stockItems.map(item => {
+                const status = getStockStatus(item);
+                return `
+                    <tr>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.stock}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.unit}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.minStock}</td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${status.class}">
+                                ${status.text}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button onclick="editStock(${item.id})" class="text-blue-600 hover:text-blue-900">Edit</button>
+                            <button onclick="addStock(${item.id})" class="text-green-600 hover:text-green-900">Tambah Stok</button>
+                            <button onclick="deleteStock(${item.id})" class="text-red-600 hover:text-red-900">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStockStats() {
+            const total = stockItems.length;
+            const outOfStock = stockItems.filter(item => item.stock === 0).length;
+            const lowStock = stockItems.filter(item => item.stock > 0 && item.stock <= item.minStock).length;
+            const safeStock = stockItems.filter(item => item.stock > item.minStock).length;
+            
+            document.getElementById('totalItemsCount').textContent = total;
+            document.getElementById('outOfStockCount').textContent = outOfStock;
+            document.getElementById('lowStockCount').textContent = lowStock;
+            document.getElementById('safeStockCount').textContent = safeStock;
+        }
+
+        function editStock(id) {
+            const item = stockItems.find(stock => stock.id === id);
+            if (!item) return;
+            
+            const newName = prompt('Nama Barang:', item.name);
+            if (!newName) return;
+            
+            const newStock = prompt('Jumlah Stok:', item.stock);
+            if (newStock === null) return;
+            
+            const newUnit = prompt('Satuan:', item.unit);
+            if (!newUnit) return;
+            
+            const newMinStock = prompt('Stok Minimum:', item.minStock);
+            if (newMinStock === null) return;
+            
+            const newDescription = prompt('Deskripsi:', item.description || '');
+            
+            item.name = newName;
+            item.stock = parseInt(newStock) || 0;
+            item.unit = newUnit;
+            item.minStock = parseInt(newMinStock) || 5;
+            item.description = newDescription || '';
+            
+            saveStock();
+            loadAdminStockTable();
+            updateStockStats();
+            populateEmployeeItemDropdown();
+        }
+
+        function addStock(id) {
+            const item = stockItems.find(stock => stock.id === id);
+            if (!item) return;
+            
+            const addAmount = prompt(`Tambah stok untuk ${item.name}:\nStok saat ini: ${item.stock} ${item.unit}\n\nMasukkan jumlah yang akan ditambahkan:`);
+            if (!addAmount || isNaN(addAmount)) return;
+            
+            const amount = parseInt(addAmount);
+            if (amount <= 0) {
+                alert('Jumlah harus lebih dari 0!');
+                return;
+            }
+            
+            item.stock += amount;
+            saveStock();
+            loadAdminStockTable();
+            updateStockStats();
+            populateEmployeeItemDropdown();
+            
+            alert(`Berhasil menambahkan ${amount} ${item.unit} ke ${item.name}. Stok sekarang: ${item.stock} ${item.unit}`);
+        }
+
+        function deleteStock(id) {
+            if (!confirm('Yakin ingin menghapus barang ini dari inventaris?')) return;
+            
+            stockItems = stockItems.filter(item => item.id !== id);
+            saveStock();
+            loadAdminStockTable();
+            updateStockStats();
+            populateEmployeeItemDropdown();
+        }
+
+        let showingLowStockOnly = false;
+        function showLowStockOnly() {
+            const tbody = document.getElementById('adminStockTableBody');
+            const filterBtn = document.getElementById('filterLowStockBtn');
+            
+            if (!showingLowStockOnly) {
+                // Show only low stock items
+                const lowStockItems = stockItems.filter(item => item.stock <= item.minStock);
+                
+                if (lowStockItems.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada stok yang menipis</td></tr>';
+                } else {
+                    tbody.innerHTML = lowStockItems.map(item => {
+                        const status = getStockStatus(item);
+                        return `
+                            <tr>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.stock}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.unit}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${item.minStock}</td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${status.class}">
+                                        ${status.text}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <button onclick="editStock(${item.id})" class="text-blue-600 hover:text-blue-900">Edit</button>
+                                    <button onclick="addStock(${item.id})" class="text-green-600 hover:text-green-900">Tambah Stok</button>
+                                    <button onclick="deleteStock(${item.id})" class="text-red-600 hover:text-red-900">Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+                
+                filterBtn.textContent = 'Tampilkan Semua';
+                filterBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
+                filterBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                showingLowStockOnly = true;
+            } else {
+                // Show all items
+                loadAdminStockTable();
+                filterBtn.textContent = 'Tampilkan Stok Menipis';
+                filterBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                filterBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
+                showingLowStockOnly = false;
+            }
+        }
+
+        function exportStock() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Nama Barang,Stok,Satuan,Stok Minimum,Status,Deskripsi,Tanggal Dibuat\n"
+                + stockItems.map(item => {
+                    const status = getStockStatus(item);
+                    return `"${item.name}","${item.stock}","${item.unit}","${item.minStock}","${status.text}","${item.description || ''}","${item.createdDate}"`;
+                }).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `inventaris_stok_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function handleAdminAddEmployee(e) {
+            e.preventDefault();
+            
+            const nip = document.getElementById('adminNewEmployeeNip').value;
+            const name = document.getElementById('adminNewEmployeeName').value;
+            const position = document.getElementById('adminNewEmployeePosition').value;
+            
+            if (!nip || !name || !position) {
+                alert('Mohon lengkapi semua field!');
+                return;
+            }
+            
+            if (employees.find(emp => emp.nip === nip)) {
+                alert('NIP sudah terdaftar!');
+                return;
+            }
+            
+            const newEmployee = {
+                id: employeeIdCounter++,
+                nip,
+                name,
+                position,
+                createdDate: new Date().toLocaleDateString('id-ID')
+            };
+            
+            employees.push(newEmployee);
+            saveEmployees();
+            
+            document.getElementById('adminAddEmployeeForm').reset();
+            loadAdminEmployeesTable();
+            
+            alert('Pegawai berhasil ditambahkan!');
+        }
+
+        function loadAdminEmployeesTable() {
+            const tbody = document.getElementById('adminEmployeesTableBody');
+            
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Belum ada data pegawai</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = employees.map(emp => `
+                <tr>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${emp.nip}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${emp.name}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${emp.position}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button onclick="editEmployee(${emp.id})" class="text-blue-600 hover:text-blue-900">Edit</button>
+                        <button onclick="deleteEmployee(${emp.id})" class="text-red-600 hover:text-red-900">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const newNip = prompt('NIP:', employee.nip);
+            if (!newNip) return;
+            
+            const newName = prompt('Nama:', employee.name);
+            if (!newName) return;
+            
+            const positions = [
+                'Ketua', 'Wakil Ketua', 'Hakim Tinggi', 'Sekretaris', 'Panitera',
+                'Panitera Muda Hukum', 'Panitera Muda Banding', 'Panitera Pengganti',
+                'Kabag Umum dan Keuangan', 'Kabag Perencanaan dan Kepegawaian',
+                'Kasubbag Rencana Program dan Anggaran', 'Kasubbag Kepegawaian dan Teknologi Informasi',
+                'Kasubbag Tata Usaha dan Rumah Tangga', 'Kasubbag Keuangan dan Pelaporan'
+            ];
+            
+            const newPosition = prompt('Jabatan:\n' + positions.map((pos, i) => `${i+1}. ${pos}`).join('\n') + '\n\nMasukkan nomor atau nama jabatan:', employee.position);
+            if (!newPosition) return;
+            
+            let finalPosition = newPosition;
+            if (!isNaN(newPosition) && newPosition >= 1 && newPosition <= positions.length) {
+                finalPosition = positions[newPosition - 1];
+            }
+            
+            employee.nip = newNip;
+            employee.name = newName;
+            employee.position = finalPosition;
+            
+            saveEmployees();
+            loadAdminEmployeesTable();
+        }
+
+        function deleteEmployee(id) {
+            if (!confirm('Yakin ingin menghapus pegawai ini?')) return;
+            
+            employees = employees.filter(emp => emp.id !== id);
+            saveEmployees();
+            loadAdminEmployeesTable();
+        }
+
+        function exportEmployees() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "NIP,Nama,Jabatan,Tanggal Dibuat\n"
+                + employees.map(emp => `"${emp.nip}","${emp.name}","${emp.position}","${emp.createdDate}"`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data_pegawai_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Employee Functions
+        function loadEmployeeData() {
+            populateEmployeeItemDropdown();
+            loadEmployeeRequests();
+            loadEmployeeProfile();
+        }
+
+        function loadEmployeeProfile() {
+            if (currentEmployeeProfile) {
+                document.getElementById('displayNip').textContent = currentEmployeeProfile.nip || '-';
+                document.getElementById('displayName').textContent = currentEmployeeProfile.name || '-';
+                document.getElementById('displayPosition').textContent = currentEmployeeProfile.position || '-';
+            }
+        }
+
+        function toggleEmployeeProfile() {
+            const displaySection = document.getElementById('employeeProfileDisplay');
+            const editSection = document.getElementById('employeeProfileEdit');
+            const editButtons = document.getElementById('profileEditButtons');
+            const editBtn = document.getElementById('editProfileBtn');
+            
+            if (editSection.classList.contains('hidden')) {
+                // Show edit mode
+                displaySection.classList.add('hidden');
+                editSection.classList.remove('hidden');
+                editButtons.classList.remove('hidden');
+                editBtn.textContent = 'Batal';
+                
+                // Populate edit fields
+                if (currentEmployeeProfile) {
+                    document.getElementById('empNip').value = currentEmployeeProfile.nip || '';
+                    document.getElementById('empRequesterName').value = currentEmployeeProfile.name || '';
+                    document.getElementById('empPosition').value = currentEmployeeProfile.position || '';
+                }
+            } else {
+                cancelEditProfile();
+            }
+        }
+
+        function saveEmployeeProfile() {
+            const nip = document.getElementById('empNip').value;
+            const name = document.getElementById('empRequesterName').value;
+            const position = document.getElementById('empPosition').value;
+            
+            if (!nip || !name || !position) {
+                alert('Mohon lengkapi semua field profil!');
+                return;
+            }
+            
+            currentEmployeeProfile = { nip, name, position };
+            localStorage.setItem('currentEmployeeProfile_' + currentUserSession, JSON.stringify(currentEmployeeProfile));
+            
+            loadEmployeeProfile();
+            cancelEditProfile();
+            
+            alert('Profil berhasil disimpan!');
+        }
+
+        function cancelEditProfile() {
+            const displaySection = document.getElementById('employeeProfileDisplay');
+            const editSection = document.getElementById('employeeProfileEdit');
+            const editButtons = document.getElementById('profileEditButtons');
+            const editBtn = document.getElementById('editProfileBtn');
+            
+            displaySection.classList.remove('hidden');
+            editSection.classList.add('hidden');
+            editButtons.classList.add('hidden');
+            editBtn.textContent = 'Edit Profil';
+        }
+
+        function populateEmployeeItemDropdown() {
+            const select = document.getElementById('empItemName');
+            select.innerHTML = '<option value="">Pilih barang...</option>';
+            
+            stockItems.forEach(item => {
+                if (item.stock > 0) {
+                    select.innerHTML += `<option value="${item.name}">${item.name} (Tersedia: ${item.stock} ${item.unit})</option>`;
+                }
+            });
+            
+            select.innerHTML += '<option value="__new_item__">➕ Tambah Barang Baru</option>';
+        }
+
+        function updateEmployeeStockInfo() {
+            const selectedItem = document.getElementById('empItemName').value;
+            const stockInfo = document.getElementById('empStockInfo');
+            const newItemFields = document.getElementById('newItemFields');
+            
+            if (selectedItem === '__new_item__') {
+                // Show new item fields
+                newItemFields.classList.remove('hidden');
+                stockInfo.textContent = 'Mengajukan barang baru - tidak ada batasan stok';
+                stockInfo.className = 'text-sm text-blue-600 mt-1';
+                document.getElementById('empQuantity').removeAttribute('max');
+                
+                // Make new item fields required
+                document.getElementById('empNewItemName').required = true;
+                document.getElementById('empNewItemUnit').required = true;
+            } else {
+                // Hide new item fields
+                newItemFields.classList.add('hidden');
+                
+                // Remove required from new item fields
+                document.getElementById('empNewItemName').required = false;
+                document.getElementById('empNewItemUnit').required = false;
+                
+                if (selectedItem) {
+                    const item = stockItems.find(item => item.name === selectedItem);
+                    if (item) {
+                        stockInfo.textContent = `Stok tersedia: ${item.stock} ${item.unit}`;
+                        stockInfo.className = 'text-sm text-green-600 mt-1';
+                        document.getElementById('empQuantity').max = item.stock;
+                    } else {
+                        stockInfo.textContent = 'Barang tidak tersedia';
+                        stockInfo.className = 'text-sm text-red-600 mt-1';
+                    }
+                } else {
+                    stockInfo.textContent = '';
+                }
+            }
+        }
+
+        function handleEmployeeRequest(e) {
+            e.preventDefault();
+            
+            // Check if profile is set
+            if (!currentEmployeeProfile) {
+                alert('Mohon lengkapi profil pegawai terlebih dahulu!');
+                return;
+            }
+            
+            const itemName = document.getElementById('empItemName').value;
+            const quantity = parseInt(document.getElementById('empQuantity').value);
+            const description = document.getElementById('empDescription').value;
+            
+            let finalItemName = itemName;
+            let isNewItem = false;
+            let newItemData = null;
+            
+            // Check if requesting new item
+            if (itemName === '__new_item__') {
+                const newItemName = document.getElementById('empNewItemName').value;
+                const newItemUnit = document.getElementById('empNewItemUnit').value;
+                const newItemDescription = document.getElementById('empNewItemDescription').value;
+                
+                if (!newItemName || !newItemUnit) {
+                    alert('Mohon lengkapi nama barang dan satuan untuk barang baru!');
+                    return;
+                }
+                
+                finalItemName = newItemName;
+                isNewItem = true;
+                newItemData = {
+                    name: newItemName,
+                    unit: newItemUnit,
+                    description: newItemDescription
+                };
+            } else {
+                // Check stock for existing items
+                const item = stockItems.find(item => item.name === itemName);
+                if (!item || item.stock < quantity) {
+                    alert('Stok tidak mencukupi untuk permintaan ini!');
+                    return;
+                }
+            }
+            
+            const newRequest = {
+                id: requestIdCounter++,
+                userSession: currentUserSession,
+                requester: currentEmployeeProfile.name,
+                nip: currentEmployeeProfile.nip,
+                position: currentEmployeeProfile.position,
+                itemName: finalItemName,
+                quantity: quantity,
+                description: description,
+                status: 'pending',
+                requestDate: new Date().toLocaleDateString('id-ID'),
+                requestTime: new Date().toLocaleTimeString('id-ID'),
+                approvedBy: null,
+                approvedDate: null,
+                isNewItem: isNewItem,
+                newItemData: newItemData
+            };
+            
+            requests.push(newRequest);
+            saveRequests();
+            
+            document.getElementById('employeeRequestForm').reset();
+            document.getElementById('empStockInfo').textContent = '';
+            document.getElementById('newItemFields').classList.add('hidden');
+            
+            const message = isNewItem 
+                ? 'Permintaan barang baru berhasil diajukan! Admin akan meninjau dan menambahkan ke database jika disetujui.'
+                : 'Permintaan berhasil diajukan! Silakan tunggu persetujuan dari admin.';
+            
+            alert(message);
+            loadEmployeeRequests();
+            populateEmployeeItemDropdown();
+        }
+
+        function loadEmployeeRequests() {
+            const myRequests = requests.filter(req => req.userSession === currentUserSession);
+            const container = document.getElementById('employeeMyRequests');
+            
+            if (myRequests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">Belum ada permintaan</p>';
+                return;
+            }
+            
+            const sortedRequests = [...myRequests].sort((a, b) => b.id - a.id);
+            
+            container.innerHTML = sortedRequests.map(req => `
+                <div class="border border-gray-200 rounded-lg p-4 ${req.isNewItem ? 'border-blue-300 bg-blue-50' : ''}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-semibold text-gray-800">${req.itemName} (${req.quantity} ${req.isNewItem ? req.newItemData.unit : getItemUnit(req.itemName)})</h4>
+                                ${req.isNewItem ? '<span class="px-2 py-1 bg-blue-500 text-white text-xs rounded-full">BARANG BARU</span>' : ''}
+                            </div>
+                            <p class="text-sm text-gray-600">ID: #${req.id} • ${req.requestDate} ${req.requestTime}</p>
+                            ${req.isNewItem && req.newItemData && req.newItemData.description ? `
+                                <p class="text-sm text-blue-700 mt-1 bg-blue-100 p-2 rounded">Spesifikasi: ${req.newItemData.description}</p>
+                            ` : ''}
+                            <p class="text-sm text-gray-600 mt-1">${req.description}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(req.status)}">
+                            ${getStatusText(req.status)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility Functions
+        function getItemUnit(itemName) {
+            const item = stockItems.find(item => item.name === itemName);
+            return item ? item.unit : 'pcs';
+        }
+
+        function getStockStatus(item) {
+            if (item.stock === 0) {
+                return { class: 'bg-red-100 text-red-800', text: 'Habis' };
+            } else if (item.stock <= item.minStock) {
+                return { class: 'bg-yellow-100 text-yellow-800', text: 'Menipis' };
+            } else {
+                return { class: 'bg-green-100 text-green-800', text: 'Tersedia' };
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending': return 'bg-yellow-100 text-yellow-800';
+                case 'approved': return 'bg-green-100 text-green-800';
+                case 'rejected': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'Menunggu Persetujuan';
+                case 'approved': return 'Disetujui';
+                case 'rejected': return 'Ditolak';
+                default: return 'Unknown';
+            }
+        }
+
+        function saveRequests() {
+            localStorage.setItem('atkRequests', JSON.stringify(requests));
+            localStorage.setItem('requestIdCounter', requestIdCounter.toString());
+        }
+
+        function saveStock() {
+            localStorage.setItem('stockItems', JSON.stringify(stockItems));
+            localStorage.setItem('stockIdCounter', stockIdCounter.toString());
+        }
+
+        function saveEmployees() {
+            localStorage.setItem('employees', JSON.stringify(employees));
+            localStorage.setItem('employeeIdCounter', employeeIdCounter.toString());
+        }
+
+        function loadInitialData() {
+            if (stockItems.length === 0) {
+                stockItems = [
+                    {
+                        id: 1,
+                        name: 'Pulpen',
+                        stock: 50,
+                        unit: 'pcs',
+                        description: 'Pulpen biru standar',
+                        minStock: 10,
+                        createdDate: '01/12/2024'
+                    },
+                    {
+                        id: 2,
+                        name: 'Kertas A4',
+                        stock: 20,
+                        unit: 'rim',
+                        description: 'Kertas A4 80gsm',
+                        minStock: 5,
+                        createdDate: '01/12/2024'
+                    },
+                    {
+                        id: 3,
+                        name: 'Spidol',
+                        stock: 15,
+                        unit: 'pcs',
+                        description: 'Spidol whiteboard',
+                        minStock: 5,
+                        createdDate: '01/12/2024'
+                    },
+                    {
+                        id: 4,
+                        name: 'Stapler',
+                        stock: 8,
+                        unit: 'pcs',
+                        description: 'Stapler ukuran sedang',
+                        minStock: 2,
+                        createdDate: '01/12/2024'
+                    },
+                    {
+                        id: 5,
+                        name: 'Penghapus',
+                        stock: 25,
+                        unit: 'pcs',
+                        description: 'Penghapus karet putih',
+                        minStock: 10,
+                        createdDate: '01/12/2024'
+                    },
+                    {
+                        id: 6,
+                        name: 'Pensil',
+                        stock: 30,
+                        unit: 'pcs',
+                        description: 'Pensil 2B',
+                        minStock: 10,
+                        createdDate: '01/12/2024'
+                    }
+                ];
+                stockIdCounter = 7;
+                saveStock();
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9788a5500224fde7',t:'MTc1Njc3MDM3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
